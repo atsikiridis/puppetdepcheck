@@ -13,7 +13,15 @@ def main():
     help_message = "Checks for potential dependency issues in puppet script."
     parser.add_argument('puppet_file_name', nargs='+', help=help_message)
     puppet_file_names = parser.parse_args().puppet_file_name
-    logging.info(puppet_file_names)
+
+    for file_name in puppet_file_names:
+        try:
+            puppet_file = open(file_name, 'r')
+        except IOError:
+            logging.error("Cannot open file %s." % (file_name,))
+        else:
+            puppet_file.close()
+
 
 if __name__ == "__main__":
     main()
