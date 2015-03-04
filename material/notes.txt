@@ -1,0 +1,34 @@
+Problem description {{{1
+Incremental additions to system configuration may introduce spurious
+dependencies.
+These decrease the confidence system administrators have on the
+configuration's robustness,
+often exepmplified by the administrators' unwillingness
+to completely shut-down and restart a data center
+or rebuild a production system from start.
+Depcheck is a system that verifies a configuration specification
+against its actual requirements and reports errors.
+
+Examples {{{1
+An undocumented dependency on an already installed package
+An incremental addition will work fine, but a clean build with a
+different order will fail.
+
+Approach {{{1
+The system incrementally records producers and consumers of various
+resources.
+These are verified against the documented dependencies between rules.
+The system outputs any discrepancies found.
+
+Optimize so that internal production consumptions don't escape
+
+Commands {{{1
+# Determine and count system calls with paths
+grep '"' setup.trace | grep -v '^ |' | grep -v 'resumed>' | sed 's/(.*//;s/^[0-9]* //;s/^  *//' | sort | uniq -c | sort -n | tee count.txt | awk '{print $2}' | sort > syscalls.txt
+sed -n '/^[0-9]/s/ .*//p' setup.trace | sort -u >procs.txt
+
+# Find open modes used
+sed -n 's/open([^,]*, \([^)]*\)) = [^-].*/\1/p' setup.trace | awk '{print $2}' | sort -u
+
+# Find clone flags used
+fgrep clone\( setup.trace  | fgrep -v unfinished | grep -v '^ | ' | sed 's/.*flags=//;s/, .*//' | sort -u >clone_flags.txt &
